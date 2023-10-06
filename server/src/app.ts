@@ -1,15 +1,20 @@
-import fs from "fs";
+import "dotenv/config";
 import express from "express";
+import cookieParser from "cookie-parser";
 
+import connectDB from "./config/db.js"
 
-const port = 5000;
+const port = process.env.PORT || 5000;
+
+connectDB();
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
+app.use(cookieParser());
 
-app.use("/", (req,res) =>{res.send("<h1>Test</h1>")});
+app.use("/", (req,res) =>{res.send("<h1>Test 2</h1>")});
 
 
 
