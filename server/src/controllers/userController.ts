@@ -1,3 +1,4 @@
+import express from "express";
 import asyncHandler from "express-async-handler";
 import {body, validationResult} from "express-validator";
 
@@ -41,7 +42,10 @@ const createUser = [
     }),
 
 
-    asyncHandler(async (req,res,next)=>{
+    asyncHandler(async (
+      req: express.Request,
+      res:express.Response,
+      next:express.NextFunction)=>{
       const validationErrors = validationResult(req);
 
       if(!validationErrors.isEmpty()){
@@ -74,11 +78,23 @@ const createUser = [
       });
 
       if(user){
-        const newUserAccessToken = createAccessToken(user._id.toString());
-        sendAccessToken(user.username,res,newUserAccessToken);
-
+        res.status(201).json({
+          message: ` user '${username}' created`
+        });
       }
-    
+      else{
+        res.status(400);
+        throw new Error("Invalid user data");
+      }
     })
+];
 
-]
+
+// @desc      Log in user 
+// @route     POST /api/users/login
+// @access    Public
+
+const loginUser = asyncHandler(async(
+  req:express.Request,res:express.Response)=>{
+
+})
