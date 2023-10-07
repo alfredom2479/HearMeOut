@@ -14,10 +14,10 @@ const createRefreshToken = (userId:string) => {
 };
 
 const sendAccessToken = (
-  req:express.Request, res:express.Response, accessToken:string) => {
-    res.send({
+  username:string, res:express.Response, accessToken:string) => {
+    res.json({
       accessToken,
-      email: req.body.email
+      username
     });
 };
 
