@@ -1,8 +1,27 @@
 import express from "express";
-import mongoose from "mongoose";
+//import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import {Model, Schema, model} from "mongoose";
 
-const {Schema} = mongoose;
+//const {Schema, Model, model} = mongoose;
+
+type friendObj = {
+  username: string,
+  roomId: string
+}
+
+interface IUser {
+  username: string,
+  email: string,
+  password: string,
+  friends?: Array<friendObj>
+}
+
+interface IUSerMethods {
+  matchPassword(enteredPassword:string): Boolean
+}
+
+type UserModel = Model<IUser, {}, IUSerMethods>;
 
 const userSchema = new Schema({
   username:{
@@ -31,10 +50,10 @@ userSchema.pre("save", async function(next: express.NextFunction){
   this.password = await bcrypt.hash(this.password,salt);
 });
 
-userSchema.methods.matchPassword = async function(enteredPassword: string){
+userSchema.method('matchPassword', async function(enteredPassword: string){
   return await bcrypt.compare(enteredPassword,this.password);
-}
+})
 
-const User = mongoose.model("User", userSchema);
+const User = model<IUser,UserModel>("User", userSchema);
 
 export default User;

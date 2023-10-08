@@ -96,5 +96,11 @@ const createUser = [
 
 const loginUser = asyncHandler(async(
   req:express.Request,res:express.Response)=>{
+   const {email, password} = req.body;
+   
+   const user = await User.findOne({email});
 
+   if(user && (await user.matchPassword(password)) ){
+    
+   }
 })
