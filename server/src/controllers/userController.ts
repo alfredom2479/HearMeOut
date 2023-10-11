@@ -101,6 +101,7 @@ const loginUser = asyncHandler(async(
    const user = await User.findOne({email});
 
    if(user && (await user.matchPassword(password)) ){
-    
+
+    //send refresh token and access token
    }
 })
