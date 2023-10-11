@@ -103,5 +103,16 @@ const loginUser = asyncHandler(async(
    if(user && (await user.matchPassword(password)) ){
 
     //send refresh token and access token
+    const accessToken = createAccessToken(user._id);
+    const refreshToken = createRefreshToken(user._id);
+
+    user.refreshtoken = refreshToken;
+
+    sendAccessToken(user.username,res, accessToken);
+    sendRefreshToken(res, refreshToken);
+   }
+   else{
+    res.status(401);
+    throw new Error("Invalid email or password");
    }
 })

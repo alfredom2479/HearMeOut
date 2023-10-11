@@ -11,10 +11,12 @@ type friendObj = {
 }
 
 interface IUser {
+  _id?: any,
   username: string,
   email: string,
   password: string,
-  friends?: Array<friendObj>
+  friends?: Array<friendObj>,
+  refreshtoken?: string
 }
 
 interface IUSerMethods {
@@ -38,7 +40,8 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Please add a password"]
   },
-  friends: [{username: String, roomId: String}]
+  friends: [{username: String, roomId: String}],
+  refreshtoken: {type: String}
 });
 
 userSchema.pre("save", async function(next: express.NextFunction){
