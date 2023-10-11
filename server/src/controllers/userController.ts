@@ -46,6 +46,9 @@ const createUser = [
       req: express.Request,
       res:express.Response,
       next:express.NextFunction)=>{
+
+      //get validation error messages if they exist and format them into
+      //a single string for easy display
       const validationErrors = validationResult(req);
 
       if(!validationErrors.isEmpty()){
@@ -61,6 +64,7 @@ const createUser = [
         throw new Error(outputErrorString);
       }
 
+      // Get body parameters and check if the user exists
       const {username, email, password} = req.body;
 
       const userExists = await User.findOne({email});
@@ -70,6 +74,7 @@ const createUser = [
         throw new Error("User already exists");
       }
 
+      //attempt to create user and return success or failure status
       const user = await User.create({
         username,
         email,
@@ -93,26 +98,63 @@ const createUser = [
 // @desc      Log in user 
 // @route     POST /api/users/login
 // @access    Public
-
 const loginUser = asyncHandler(async(
   req:express.Request,res:express.Response)=>{
-   const {email, password} = req.body;
-   
-   const user = await User.findOne({email});
+    
+    //Get user email and password from body
+    const {email, password} = req.body;
 
-   if(user && (await user.matchPassword(password)) ){
+    //Get user from db using email parameter
+    const user = await User.findOne({email});
 
-    //send refresh token and access token
-    const accessToken = createAccessToken(user._id);
-    const refreshToken = createRefreshToken(user._id);
+    //Check is user exists and if the password is correct
+    if(user && (await user.matchPassword(password)) ){
 
-    user.refreshtoken = refreshToken;
+      //Create and send refresh token and access token
+      const accessToken = createAccessToken(user._id);
+      const refreshToken = createRefreshToken(user._id);
 
-    sendAccessToken(user.username,res, accessToken);
-    sendRefreshToken(res, refreshToken);
-   }
-   else{
-    res.status(401);
-    throw new Error("Invalid email or password");
-   }
-})
+      //Add refressh token to user in DB
+      user.refreshtoken = refreshToken;
+
+      sendAccessToken(user.username,res, accessToken);
+      sendRefreshToken(res, refreshToken);
+      res.status(200);
+    }
+    else{
+      res.status(401);
+      throw new Error("Invalid email or password");
+    }
+});
+
+// @desc      Log out user 
+// @route     POST /api/users/logout
+// @access    Private
+const logoutUser = asyncHandler(async (
+  req:express.Request,res:express.Response)=>{
+    res.clearCookie("refreshtoken",{path: '/refresh_token'});
+    //remove refresh token from db
+    
+    res.status(200).json({message: "Logged out succesfully"});
+});
+
+// @desc      Gets current user information
+// @route     GET /api/users/me
+// @access    Private
+const getMe = asyncHandler( async (
+  req:any,res:express.Response)=>{
+    const user = await User.findById(req.user._id);
+
+    if(user){
+      req.json({
+        _id: user._id,
+        username: user.username,
+        email: user.email
+      });
+    }else{
+      res.status(404);
+      throw new Error("User not found");
+    }
+});
+
+export {createUser, loginUser, logoutUser, getMe};
