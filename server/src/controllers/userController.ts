@@ -106,6 +106,7 @@ const loginUser = asyncHandler(async(
 
     //Get user from db using email parameter
     const user = await User.findOne({email});
+    console.log(user);
 
     //Check is user exists and if the password is correct
     if(user && (await user.matchPassword(password)) ){
@@ -116,10 +117,11 @@ const loginUser = asyncHandler(async(
 
       //Add refressh token to user in DB
       user.refreshtoken = refreshToken;
+      await user.save();
 
-      sendAccessToken(user.username,res, accessToken);
-      sendRefreshToken(res, refreshToken);
       res.status(200);
+      sendRefreshToken(res, refreshToken);
+      sendAccessToken(user.username,res, accessToken);
     }
     else{
       res.status(401);
