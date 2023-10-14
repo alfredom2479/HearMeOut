@@ -145,10 +145,13 @@ const logoutUser = asyncHandler(async (
 // @access    Private
 const getMe = asyncHandler( async (
   req:any,res:express.Response)=>{
-    const user = await User.findById(req.user._id);
+
+    const {username} = req.decodedToken;
+    console.log(username);
+    const user = await User.findOne({username});
 
     if(user){
-      req.json({
+      res.json({
         _id: user._id,
         username: user.username,
         email: user.email

@@ -4,13 +4,14 @@ import asyncHandler from 'express-async-handler';
 //instead of refresh token
 const protect = asyncHandler(async (req, res, next) => {
     const accessToken = req.get('accesstoken');
-    console.log(accessToken);
+    console.log("access token: " + accessToken);
     if (!accessToken)
         throw new Error("missing accessToken");
     //const decodedToken = accessToken.splitI
     const decodedToken = jwt.verify(accessToken, process.env.ACCESS_JWT_SECRET);
-    console.log("decoded token: ");
+    console.log("decoded access token: ");
     console.log(decodedToken);
+    req.decodedToken = decodedToken;
     next();
     /*
     let token:string;
