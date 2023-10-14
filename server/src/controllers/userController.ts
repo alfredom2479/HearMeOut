@@ -112,7 +112,7 @@ const loginUser = asyncHandler(async(
     if(user && (await user.matchPassword(password)) ){
 
       //Create and send refresh token and access token
-      const accessToken = createAccessToken(user._id);
+      const accessToken = createAccessToken(user.username);
       const refreshToken = createRefreshToken(user._id);
 
       //Add refressh token to user in DB
@@ -159,4 +159,29 @@ const getMe = asyncHandler( async (
     }
 });
 
-export {createUser, loginUser, logoutUser, getMe};
+// @desc      Get new access token
+// @route     GET /api/users/refresh_token
+// @access    Private
+const getNewToken = asyncHandler(async (req:any,res)=>{
+
+  const userInfo = req.refreshtoken;
+  console.log(userInfo);
+  const user = await User.findOne({_id:userInfo.userId});
+  if(!user) res.json({accessToken: ''});
+
+  if(user.refreshtoken !== req.cookies.refreshtoken){
+    res.json({accessToken: ''});
+  }
+
+  const newAccessToken = createAccessToken(user.username);
+  const newRefreshToken = createRefreshToken(user._id);
+
+  user.refreshtoken = newRefreshToken;
+  await user.save();
+
+  res.status(200);
+  sendRefreshToken(res, newRefreshToken);
+  sendAccessToken(user.username,res, newAccessToken);
+});
+
+export {createUser, loginUser, logoutUser, getMe, getNewToken};

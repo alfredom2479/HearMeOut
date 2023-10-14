@@ -1,8 +1,8 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 
-const createAccessToken = (userId:string) =>{
-  return jwt.sign({userId}, process.env.ACCESS_JWT_SECRET,{
+const createAccessToken = (username:string) =>{
+  return jwt.sign({username}, process.env.ACCESS_JWT_SECRET,{
     expiresIn: '10m'
   });
 };
@@ -27,7 +27,7 @@ const sendRefreshToken = (res:express.Response, refreshToken:string) => {
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 24*60*60*1000,
-    path: "/refresh_token"
+    //path: "/refresh_token"
   })
 }
 

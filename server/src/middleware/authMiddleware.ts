@@ -9,6 +9,19 @@ import User from "../models/userModel.js";
 const protect = asyncHandler(async (
   req:any,res:express.Response,next:express.NextFunction)=>{
 
+    const accessToken = req.get('accesstoken');
+    console.log(accessToken);
+
+    if(!accessToken) throw new Error("missing accessToken");
+
+    //const decodedToken = accessToken.splitI
+    const decodedToken = jwt.verify(accessToken,process.env.ACCESS_JWT_SECRET);
+    console.log("decoded token: ");
+    console.log(decodedToken);
+
+    next();
+
+    /*
     let token:string;
 
     token = req.cookies.refreshtoken;
@@ -27,5 +40,23 @@ const protect = asyncHandler(async (
     else{
       res.status(401);
     }
+    */
 
-})
+});
+
+const checkAndRefresh = (req,res,next)=>{
+
+  const userRefreshToken = req.cookies.refreshtoken;
+  console.log(req.cookies);
+  console.log(userRefreshToken);
+  if(!userRefreshToken) return res.json({accessToken: ''});
+
+  const decodedToken = jwt.verify(userRefreshToken, process.env.REFRESH_JWT_SECRET);
+  if(!decodedToken) return res.json({accessToken: ''});
+
+  req.refreshtoken = decodedToken;
+  
+  next();
+}
+
+export {protect, checkAndRefresh} ;
